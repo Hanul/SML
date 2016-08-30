@@ -1,7 +1,7 @@
 require('./import/UJS-NODE.js');
-require('./sml.js');
+require('./SML.js');
 
-var html = sml(READ_FILE({
+var html = SML(READ_FILE({
 	path : 'example.sml',
 	isSync : true
 }).toString());
