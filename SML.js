@@ -62,7 +62,7 @@ global.SML = METHOD(function() {
 									} else if (ch === '\n') {
 										
 										if (ret !== '' && i < subContent.length - 2) {
-											ret += '<br/>';
+											ret += '<br>';
 										}
 										
 										ret += '\n';
@@ -110,7 +110,7 @@ global.SML = METHOD(function() {
 			console.log('[SML] parse error.');
 		}
 		
-		return attrs + (content === '' ? '/>' : '>' + content + '</' + tag + '>');
+		return attrs + (content === '' ? (tag === 'meta' || tag === 'br' ? '>' : ' />') : '>' + content + '</' + tag + '>');
 	},
 	
 	// parse.
@@ -168,7 +168,8 @@ global.SML = METHOD(function() {
 					
 					// parse sub html.
 					if (subContent !== '') {
-						html += parse(subContent, tabCount + 1, appendTabCount);
+						
+						html += '>\n' + parse(subContent, tabCount + 1, appendTabCount);
 						subContent = '';
 						
 						REPEAT(tabCount + appendTabCount + 1, function() {
@@ -176,6 +177,11 @@ global.SML = METHOD(function() {
 						});
 						
 						html += '</' + tag + '>\n';
+						tag = undefined;
+					}
+					
+					else if (tag !== undefined) {
+						html += ' />\n';
 					}
 					
 					REPEAT(tabCount + appendTabCount + 1, function() {
@@ -252,8 +258,7 @@ global.SML = METHOD(function() {
 					// parse value.
 					if (value !== undefined) {
 						html += parseValue(tag, value, tabCount + 1, appendTabCount) + '\n';
-					} else {
-						html += '>\n';
+						tag = undefined;
 					}
 				}
 				
@@ -288,16 +293,18 @@ global.SML = METHOD(function() {
 		}
 		
 		if (subContent !== '') {
-			html += parse(subContent, tabCount + 1, appendTabCount);
+			
+			html += '>\n' + parse(subContent, tabCount + 1, appendTabCount);
 			
 			REPEAT(tabCount + appendTabCount + 1, function() {
 				html += '\t';
 			});
 			
 			html += '</' + tag + '>\n';
+			tag = undefined;
 			
-		} else {
-			html = html.substring(0, html.length);
+		} else if (tag !== undefined) {
+			html += ' />\n';
 		}
 		
 		return html;
@@ -328,7 +335,7 @@ global.SML = METHOD(function() {
 				body = '';
 			}
 			
-			return '<!doctype html>\n<html>\n\t<head>\n\t\t<meta charset="UTF-8"/>\n' + head + '\t</head>\n' + body + '</html>';
+			return '<!doctype html>\n<html>\n\t<head>\n\t\t<meta charset="UTF-8">\n' + head + '\t</head>\n' + body + '</html>';
 		}
 	};
 });
