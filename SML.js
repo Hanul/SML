@@ -1,118 +1,11 @@
 /**
- * HTML로 변환되는 간단한 데이터 표현식
+ * HTML로 변환되는 간단한 마크업 언어
  */
+// TODO: 오류 처리
 global.SML = METHOD(function() {
 	'use strict';
 	
 	var
-	// parse value.
-	parseValue = function(tag, value, tabCount, appendTabCount) {
-		
-		var
-		// attrs
-		attrs = '',
-		
-		// content
-		content = '',
-		
-		// attribute name
-		attrName = '',
-		
-		// last index
-		lastIndex = 0,
-		
-		// is string mode
-		isStringMode;
-		
-		EACH(value, function(ch, i) {
-			
-			if (ch === '\'' && value[i - 1] !== '\\') {
-				if (isStringMode === true) {
-					
-					if (attrName.trim() === '') {
-						content += RUN(function() {
-							
-							var
-							// sub content
-							subContent = value.substring(lastIndex + 1, i),
-							
-							// ret
-							ret = '',
-							
-							// now tab count
-							nowTabCount = tabCount;
-							
-							EACH(subContent, function(ch, i) {
-								
-								if (nowTabCount !== -1) {
-									if (ch === '\t') {
-										nowTabCount += 1;
-										if (nowTabCount === tabCount + 1) {
-											nowTabCount = -1;
-										}
-									} else {
-										nowTabCount = -1;
-									}
-								}
-								
-								if (nowTabCount === -1) {
-									
-									if (ch === '\r' || (ch === '\\' && subContent[i + 1] === '\'')) {
-										// ignore.
-									} else if (ch === '\n') {
-										
-										if (ret !== '' && i < subContent.length - 2) {
-											ret += '<br>';
-										}
-										
-										ret += '\n';
-										
-										REPEAT(nowTabCount + appendTabCount + 2, function() {
-											ret += '\t';
-										});
-										
-										nowTabCount = tabCount;
-									} else {
-										ret += ch;
-									}
-								}
-							});
-							
-							return ret;
-						});
-					}
-					
-					else if (tag === 'meta') {
-						attrName = attrName.trim();
-						attrName = attrName.substring(0, attrName.length - 1);
-						attrs += ' name=' + '"' + attrName + '" content="' + value.substring(lastIndex + 1, i) + '"';
-					}
-					
-					else {
-						attrs += attrName + '"' + value.substring(lastIndex + 1, i) + '"';
-					}
-					
-					attrName = '';
- 					
-					isStringMode = false;
-				} else {
-					isStringMode = true;
-				}
-			}
-			
-			else if (isStringMode !== true) {
-				attrName += ch;
-				lastIndex = i + 1;
-			}
-		});
-		
-		if (isStringMode === true) {
-			console.log('[SML] parse error.');
-		}
-		
-		return attrs + (content === '' ? (tag === 'meta' || tag === 'br' ? '>' : ' />') : '>' + content + '</' + tag + '>');
-	},
-	
 	// parse.
 	parse = function(content, tabCount, appendTabCount) {
 		//REQUIRED: content
@@ -145,14 +38,17 @@ global.SML = METHOD(function() {
 			// value
 			value,
 			
-			// id
-			id,
+			// mode ch
+			modeCh,
 			
-			// clss
-			clss,
+			// id
+			id = '',
 			
 			// cls
-			cls;
+			cls = '',
+			
+			// clss
+			clss = [];
 			
 			EACH(line, function(ch) {
 				if (ch === '\t') {
@@ -166,99 +62,219 @@ global.SML = METHOD(function() {
 				
 				if (nowTabCount === tabCount) {
 					
-					// parse sub html.
-					if (subContent !== '') {
+					line = line.trim();
+					
+					// ignore comment line.
+					if (line[0] !== '#') {
 						
-						html += '>\n' + parse(subContent, tabCount + 1, appendTabCount);
-						subContent = '';
+						// parse sub html.
+						if (subContent !== '') {
+							
+							html += '>\n' + parse(subContent, tabCount + 1, appendTabCount);
+							subContent = '';
+							
+							REPEAT(tabCount + appendTabCount + 1, function() {
+								html += '\t';
+							});
+							
+							html += '</' + tag + '>\n';
+							tag = undefined;
+						}
+						
+						else if (tag !== undefined && tag !== '\'') {
+							html += tag === 'meta' || tag === 'link' || tag === 'br' ? '>\n' : (tag === 'script' ? '></script>\n' : ' />\n');
+						}
 						
 						REPEAT(tabCount + appendTabCount + 1, function() {
 							html += '\t';
 						});
 						
-						html += '</' + tag + '>\n';
-						tag = undefined;
-					}
-					
-					else if (tag !== undefined) {
-						html += ' />\n';
-					}
-					
-					REPEAT(tabCount + appendTabCount + 1, function() {
-						html += '\t';
-					});
-					
-					// find tag.
-					tag = '';
-					line = line.trim();
-					EACH(line, function(ch, i) {
-						
-						if (ch === ' ' || ch === '\t' || ch === '#' || ch === '.') {
-							
-							if (cls !== undefined) {
-								if (clss === undefined) {
-									clss = [];
-								}
-								clss.push(cls);
-							}
+						// find tag.
+						if (line[0] === '\'') {
+							tag = '\'';
+							value = line;
 						}
-						
-						if (ch === ' ' || ch === '\t') {
-							value = line.substring(i);
-							return false;
-						}
-						
-						// id
-						else if (ch === '#') {
-							id = '';
-							cls = undefined;
-						}
-						
-						// cls
-						else if (ch === '.') {
-							id = undefined;
-							cls = '';
-						}
-						
+
 						else {
-							if (id !== undefined) {
-								id += ch;
-							} else if (cls !== undefined) {
-								cls += ch;
-							} else {
-								tag += ch;
-							}
-						}
-					});
-					
-					html += '<' + tag;
-					
-					if (id !== undefined) {
-						value = ' id=\'' + id + '\'' + (value === undefined ? '' : ' ' + value);
-					}
-					
-					if (clss !== undefined) {
-						value = ' class=\'' + RUN(function() {
-							
-							var
-							// ret
-							ret = '';
-							
-							EACH(clss, function(cls, i) {
-								if (i > 0) {
-									ret += ' ';
+							tag = '';
+							EACH(line, function(ch, i) {
+								
+								if (ch === ' ' || ch === '\t') {
+									value = line.substring(i);
+									return false;
 								}
-								ret += cls;
+								
+								else if (ch === '#' || ch === '.') {
+									
+									if (cls !== '') {
+										clss.push(cls);
+										cls = '';
+									}
+									
+									modeCh = ch;
+								}
+								
+								else {
+									if (modeCh === '#') {
+										id += ch;
+									} else if (modeCh === '.') {
+										cls += ch;
+									} else {
+										tag += ch;
+									}
+								}
 							});
 							
-							return ret;
-						}) + '\'' + (value === undefined ? '' : ' ' + value);
-					}
-					
-					// parse value.
-					if (value !== undefined) {
-						html += parseValue(tag, value, tabCount + 1, appendTabCount) + '\n';
-						tag = undefined;
+							if (cls !== '') {
+								clss.push(cls);
+								cls = '';
+							}
+							
+							html += '<' + tag;
+						}
+						
+						if (clss.length > 0) {
+							value = ' class=\'' + RUN(function() {
+								
+								var
+								// ret
+								ret = '';
+								
+								EACH(clss, function(cls, i) {
+									if (i > 0) {
+										ret += ' ';
+									}
+									ret += cls;
+								});
+								
+								return ret;
+							}) + '\'' + (value === undefined ? '' : value);
+						}
+						
+						if (id !== '') {
+							value = ' id=\'' + id + '\'' + (value === undefined ? '' : value);
+						}
+						
+						// parse value.
+						if (value !== undefined) {
+							
+							RUN(function() {
+								
+								var
+								// attrs
+								attrs = '',
+								
+								// content
+								content = '',
+								
+								// attribute name
+								attrName = '',
+								
+								// last index
+								lastIndex = 0,
+								
+								// is string mode
+								isStringMode;
+								
+								EACH(value, function(ch, i) {
+									
+									if (ch === '\'' && value[i - 1] !== '\\') {
+										if (isStringMode === true) {
+											
+											if (attrName.trim() === '') {
+												
+												content += RUN(function() {
+													
+													var
+													// sub content
+													subContent = value.substring(lastIndex + 1, i),
+													
+													// ret
+													ret = '',
+													
+													// now tab count
+													nowTabCount = tabCount + 1;
+													
+													EACH(subContent, function(ch, i) {
+														
+														if (nowTabCount !== -1) {
+															if (ch === '\t') {
+																nowTabCount += 1;
+																if (nowTabCount === tabCount + 2) {
+																	nowTabCount = -1;
+																}
+															} else {
+																nowTabCount = -1;
+															}
+														}
+														
+														if (nowTabCount === -1) {
+															
+															if (ch === '\r' || (ch === '\\' && subContent[i + 1] === '\'')) {
+																// ignore.
+															} else if (ch === '\n') {
+																
+																if (ret !== '' && subContent.substring(i).trim() !== '') {
+																	ret += '<br>';
+																}
+																
+																ret += '\n';
+																
+																REPEAT(nowTabCount + appendTabCount + 2, function() {
+																	ret += '\t';
+																});
+																
+																nowTabCount = tabCount + 1;
+															} else {
+																ret += ch;
+															}
+														}
+													});
+													
+													return ret;
+												});
+											}
+											
+											else if (tag === 'meta') {
+												attrName = attrName.trim();
+												attrName = attrName.substring(0, attrName.length - 1);
+												attrs += ' name=' + '"' + attrName + '" content="' + value.substring(lastIndex + 1, i) + '"';
+											}
+											
+											else {
+												attrs += attrName + '"' + value.substring(lastIndex + 1, i) + '"';
+											}
+											
+											attrName = '';
+						 					
+											isStringMode = false;
+										} else {
+											isStringMode = true;
+										}
+									}
+									
+									else if (isStringMode !== true) {
+										attrName += ch;
+										lastIndex = i + 1;
+									}
+								});
+								
+								if (isStringMode === true) {
+									SHOW_ERROR('[SML] 문자열 구문이 아직 끝나지 않았습니다.', value);
+								}
+								
+								if (content === '') {
+									html += attrs;
+								} else {
+									if (tag === '\'') {
+										html += content + '\n';
+									} else {
+										html += attrs + '>' + content + '</' + tag + '>\n';
+									}
+									tag = undefined;
+								}
+							});
+						}
 					}
 				}
 				
@@ -285,7 +301,7 @@ global.SML = METHOD(function() {
 		});
 		
 		if (isStringMode === true) {
-			console.log('[SML] parse error.');
+			SHOW_ERROR('[SML] 문자열 구문이 아직 끝나지 않았습니다.', content.substring(lastIndex));
 		}
 		
 		else {
@@ -302,9 +318,10 @@ global.SML = METHOD(function() {
 			
 			html += '</' + tag + '>\n';
 			tag = undefined;
-			
-		} else if (tag !== undefined) {
-			html += ' />\n';
+		}
+		
+		else if (tag !== undefined && tag !== '\'') {
+			html += tag === 'meta' || tag === 'link' || tag === 'br' ? '>\n' : (tag === 'script' ? '></script>\n' : ' />\n');
 		}
 		
 		return html;
