@@ -1,4 +1,4 @@
-require('./import/UJS-NODE.js');
+require('./import/UPPERCASE-CORE/NODE.js');
 require('./SML.js');
 
 var html = SML(READ_FILE({

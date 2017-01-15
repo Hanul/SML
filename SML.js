@@ -1,7 +1,6 @@
 /**
  * HTML로 변환되는 간단한 마크업 언어
  */
-// TODO: 오류 처리
 global.SML = METHOD(function() {
 	'use strict';
 	
@@ -27,6 +26,9 @@ global.SML = METHOD(function() {
 		
 		// is string mode
 		isStringMode,
+		
+		// is pass mode
+		isPassMode,
 		
 		// parse line.
 		parseLine = function(line) {
@@ -70,18 +72,29 @@ global.SML = METHOD(function() {
 						// parse sub html.
 						if (subContent !== '') {
 							
-							html += '>\n' + parse(subContent, tabCount + 1, appendTabCount);
-							subContent = '';
+							if (tag !== undefined) {
+								html += '>\n' + parse(subContent, tabCount + 1, appendTabCount);
+								subContent = '';
+								
+								REPEAT(tabCount + appendTabCount + 1, function() {
+									html += '\t';
+								});
+								
+								html += '</' + tag + '>\n';
+								tag = undefined;
+							}
 							
-							REPEAT(tabCount + appendTabCount + 1, function() {
-								html += '\t';
-							});
-							
-							html += '</' + tag + '>\n';
-							tag = undefined;
+							else {
+								html += parse(subContent, tabCount + 1, appendTabCount - 1);
+								subContent = '';
+								
+								REPEAT(tabCount + appendTabCount - 1, function() {
+									html += '\t';
+								});
+							}
 						}
 						
-						else if (tag !== undefined && tag !== '\'') {
+						else if (tag !== undefined && tag !== '\'' && tag !== '`') {
 							html += tag === 'meta' || tag === 'link' || tag === 'br' ? '>\n' : (tag === 'script' ? '></script>\n' : ' />\n');
 						}
 						
@@ -92,6 +105,11 @@ global.SML = METHOD(function() {
 						// find tag.
 						if (line[0] === '\'') {
 							tag = '\'';
+							value = line;
+						}
+						
+						else if (line[0] === '`') {
+							tag = '`';
 							value = line;
 						}
 
@@ -174,11 +192,14 @@ global.SML = METHOD(function() {
 								lastIndex = 0,
 								
 								// is string mode
-								isStringMode;
+								isStringMode,
+								
+								// is pass mode
+								isPassMode;
 								
 								EACH(value, function(ch, i) {
 									
-									if (ch === '\'' && value[i - 1] !== '\\') {
+									if (isPassMode !== true && ch === '\'' && value[i - 1] !== '\\') {
 										if (isStringMode === true) {
 											
 											if (attrName.trim() === '') {
@@ -253,20 +274,35 @@ global.SML = METHOD(function() {
 										}
 									}
 									
-									else if (isStringMode !== true) {
+									else if (isStringMode !== true && ch === '`' && value[i - 1] !== '\\') {
+										if (isPassMode === true) {
+											
+											if (attrName.trim() === '') {
+												content += value.substring(lastIndex + 1, i);
+											}
+											
+											attrName = '';
+						 					
+											isPassMode = false;
+										} else {
+											isPassMode = true;
+										}
+									}
+									
+									else if (isStringMode !== true && isPassMode !== true) {
 										attrName += ch;
 										lastIndex = i + 1;
 									}
 								});
 								
-								if (isStringMode === true) {
+								if (isStringMode === true || isPassMode === true) {
 									SHOW_ERROR('[SML] 문자열 구문이 아직 끝나지 않았습니다.', value);
 								}
 								
 								if (content === '') {
 									html += attrs;
 								} else {
-									if (tag === '\'') {
+									if (tag === '\'' || tag === '`') {
 										html += content + '\n';
 									} else {
 										html += attrs + '>' + content + '</' + tag + '>\n';
@@ -294,13 +330,21 @@ global.SML = METHOD(function() {
 				}
 			}
 			
-			else if (isStringMode !== true && ch === '\n') {
+			else if (ch === '`' && content[i - 1] !== '\\') {
+				if (isPassMode === true) {
+					isPassMode = false;
+				} else {
+					isPassMode = true;
+				}
+			}
+			
+			else if (isStringMode !== true && isPassMode !== true && ch === '\n') {
 				parseLine(content.substring(lastIndex, i));
 				lastIndex = i + 1;
 			}
 		});
 		
-		if (isStringMode === true) {
+		if (isStringMode === true || isPassMode === true) {
 			SHOW_ERROR('[SML] 문자열 구문이 아직 끝나지 않았습니다.', content.substring(lastIndex));
 		}
 		
@@ -310,17 +354,28 @@ global.SML = METHOD(function() {
 		
 		if (subContent !== '') {
 			
-			html += '>\n' + parse(subContent, tabCount + 1, appendTabCount);
+			if (tag !== undefined) {
+				html += '>\n' + parse(subContent, tabCount + 1, appendTabCount);
+				
+				REPEAT(tabCount + appendTabCount + 1, function() {
+					html += '\t';
+				});
+				
+				html += '</' + tag + '>\n';
+				
+				tag = undefined;
+			}
 			
-			REPEAT(tabCount + appendTabCount + 1, function() {
-				html += '\t';
-			});
-			
-			html += '</' + tag + '>\n';
-			tag = undefined;
+			else {
+				html += parse(subContent, tabCount + 1, appendTabCount - 1);
+				
+				REPEAT(tabCount + appendTabCount - 1, function() {
+					html += '\t';
+				});
+			}
 		}
 		
-		else if (tag !== undefined && tag !== '\'') {
+		else if (tag !== undefined && tag !== '\'' && tag !== '`') {
 			html += tag === 'meta' || tag === 'link' || tag === 'br' ? '>\n' : (tag === 'script' ? '></script>\n' : ' />\n');
 		}
 		

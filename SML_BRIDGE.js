@@ -47,7 +47,7 @@ global.SML_BRIDGE = METHOD(function(m) {
 					responseNotFound(response);
 				},
 				
-				requestListener : function(requestInfo, response, onDisconnected, setRootPath, next) {
+				requestListener : function(requestInfo, response, setRootPath, next) {
 					
 					var
 					// uri
@@ -85,7 +85,7 @@ global.SML_BRIDGE = METHOD(function(m) {
 						// server root path. (index)
 						if (uri === '') {
 							
-							CHECK_IS_EXISTS_FILE(rootPath + '/index.sml', function(isExists) {
+							CHECK_FILE_EXISTS(rootPath + '/index.sml', function(isExists) {
 								if (isExists === true) {
 									uri = 'index.sml';
 								} else {
@@ -117,7 +117,7 @@ global.SML_BRIDGE = METHOD(function(m) {
 								function(next) {
 									
 									// serve .sml file.
-									CHECK_IS_EXISTS_FILE(path + '.sml', function(isExists) {
+									CHECK_FILE_EXISTS(path + '.sml', function(isExists) {
 										
 										if (isExists === true) {
 											
@@ -142,7 +142,7 @@ global.SML_BRIDGE = METHOD(function(m) {
 									return function() {
 										
 										// serve static file.
-										CHECK_IS_EXISTS_FILE(path, function(isExists) {
+										CHECK_FILE_EXISTS(path, function(isExists) {
 											
 											if (isExists === true) {
 											
