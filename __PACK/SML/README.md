@@ -1,11 +1,32 @@
 # SML
 HTML로 변환되는 간단한 마크업 언어
 
+## 설치하기
+### Node.js 프로젝트
+1. SML 프로젝트를 다운로드 받습니다.
+2. 아래 코드를 통해 모듈을 불러옵니다.
+	```javascript
+	require('./import/UPPERCASE-CORE/NODE.js');
+	require('./SML.js');
+	```
+
+### UPPERCASE 기반 프로젝트
+1. 프로젝트의 `DEPENDENCY` 파일에 `Hanul/SML`를 추가합니다.
+2. [`ubm`](https://www.npmjs.com/package/ubm)을 이용해 설치합니다.
+    ```
+    ubm install
+    ```
+3. `NODE/MAIN.js`의 `MAIN` 함수에 다음 내용을 추가합니다.
+	```javascript
+	addRequestListener(SML_BRIDGE({
+		rootPath : './'
+	}).requestListener);
+	```
+	
+	- `rootPath` `.sml` 파일 혹은 리소스 등이 저장된 경로를 지정합니다.
+
 ## 실행 방법
 ```javascript
-require('./import/UJS-NODE.js');
-require('./SML.js');
-
 var html = SML(READ_FILE({
 	path : 'example.sml',
 	isSync : true

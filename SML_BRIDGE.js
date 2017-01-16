@@ -36,6 +36,8 @@ global.SML_BRIDGE = METHOD(function(m) {
 	return {
 		
 		run : function(config) {
+			//REQUIRED: config
+			//REQUIRED: config.rootPath
 			
 			var
 			// root path

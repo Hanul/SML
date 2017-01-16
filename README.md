@@ -16,6 +16,14 @@ HTML로 변환되는 간단한 마크업 언어
     ```
     ubm install
     ```
+3. `NODE/MAIN.js`의 `MAIN` 함수에 다음 내용을 추가합니다.
+	```javascript
+	addRequestListener(SML_BRIDGE({
+		rootPath : './'
+	}).requestListener);
+	```
+	
+	- `rootPath` `.sml` 파일 혹은 리소스 등이 저장된 경로를 지정합니다.
 
 ## 실행 방법
 ```javascript
