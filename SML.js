@@ -322,7 +322,7 @@ global.SML = METHOD(function() {
 		
 		EACH(content, function(ch, i) {
 			
-			if (ch === '\'' && content[i - 1] !== '\\') {
+			if (isPassMode !== true && ch === '\'' && content[i - 1] !== '\\') {
 				if (isStringMode === true) {
 					isStringMode = false;
 				} else {
@@ -330,7 +330,7 @@ global.SML = METHOD(function() {
 				}
 			}
 			
-			else if (ch === '`' && content[i - 1] !== '\\') {
+			else if (isStringMode !== true && ch === '`' && content[i - 1] !== '\\') {
 				if (isPassMode === true) {
 					isPassMode = false;
 				} else {
