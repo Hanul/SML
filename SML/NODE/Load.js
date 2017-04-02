@@ -41,7 +41,7 @@ SML.Load = METHOD((m) => {
 							error : errorHandler,
 							success : (buffer) => {
 								
-								let html = SML(buffer.toString());
+								let html = SML.Compile(buffer.toString());
 								
 								cachedFileInfos[path] = {
 									lastUpdateTime : fileInfo.lastUpdateTime === undefined ? fileInfo.createTime : fileInfo.lastUpdateTime,

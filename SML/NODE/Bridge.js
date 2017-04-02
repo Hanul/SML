@@ -52,7 +52,7 @@ SML.Bridge = METHOD((m) => {
 					
 					run = () => {
 						
-						LOAD_SML(path, {
+						SML.Load(path, {
 							notExists : () => {
 								responseNotFound(response);
 							},
