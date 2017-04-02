@@ -1,7 +1,6 @@
-require('./import/UPPERCASE-CORE/NODE.js');
-require('./SML.js');
+let SML = require('./index.js');
 
-var html = SML(READ_FILE({
+let html = SML.Compile(READ_FILE({
 	path : 'example.sml',
 	isSync : true
 }).toString());

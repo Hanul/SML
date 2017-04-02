@@ -1,0 +1,8 @@
+{
+  "name": "simplemarkuplanguage",
+  "version": "0.0.1",
+  "dependencies": {
+    "uppercase-core": "latest"
+  },
+  "main": "index.js"
+}
