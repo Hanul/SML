@@ -349,7 +349,7 @@ SML.Compile = METHOD(() => {
 			let head;
 			let body;
 			
-			if (content[bodyStartIndex + 5] === '\n' && (bodyStartIndex === 0 || content[bodyStartIndex - 1] === '\n')) {
+			if (content[bodyStartIndex + 4] === '\n' && (bodyStartIndex === 0 || content[bodyStartIndex - 1] === '\n')) {
 				head = parse(content.substring(0, bodyStartIndex), 0, 1);
 				body = parse(content.substring(bodyStartIndex), 0, 0);
 			}
