@@ -355,8 +355,8 @@ SML.Compile = METHOD(() => {
 			}
 			
 			else {
-				head = parse(content, 0, 1);
-				body = '';
+				head = '';
+				body = parse(content, 0, 1);
 			}
 			
 			return '<!doctype html>\n<html>\n\t<head>\n\t\t<meta charset="UTF-8">\n' + head + '\t</head>\n' + body + '</html>';
