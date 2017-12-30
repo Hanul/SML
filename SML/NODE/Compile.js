@@ -69,7 +69,7 @@ SML.Compile = METHOD(() => {
 						}
 						
 						else if (tag !== undefined && tag !== '\'' && tag !== '`') {
-							html += tag === 'meta' || tag === 'link' || tag === 'br' ? '>\n' : (tag === 'script' ? '></script>\n' : ' />\n');
+							html += tag === 'meta' || tag === 'link' || tag === 'br' ? '>\n' : '></' + tag + '>\n';
 						}
 						
 						REPEAT(tabCount + appendTabCount + 1, () => {
@@ -333,7 +333,7 @@ SML.Compile = METHOD(() => {
 		}
 		
 		else if (tag !== undefined && tag !== '\'' && tag !== '`') {
-			html += tag === 'meta' || tag === 'link' || tag === 'br' ? '>\n' : (tag === 'script' ? '></script>\n' : ' />\n');
+			html += tag === 'meta' || tag === 'link' || tag === 'br' ? '>\n' : '></' + tag + '>\n';
 		}
 		
 		return html;
