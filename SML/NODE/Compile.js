@@ -193,15 +193,7 @@ SML.Compile = METHOD(() => {
 															// ignore.
 														} else if (ch === '\n') {
 															
-															if (ret !== '' && subContent.substring(i).trim() !== '') {
-																ret += '<br>';
-															}
-															
 															ret += '\n';
-															
-															REPEAT(nowTabCount + appendTabCount + 2, () => {
-																ret += '\t';
-															});
 															
 															nowTabCount = tabCount + 1;
 														} else {
