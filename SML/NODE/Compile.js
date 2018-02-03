@@ -228,7 +228,7 @@ SML.Compile = METHOD(() => {
 									if (isPassMode === true) {
 										
 										if (attrName.trim() === '') {
-											content += value.substring(lastIndex + 1, i);
+											content += value.substring(lastIndex + 1, i).replace(/\\`/g, '`');
 										}
 										
 										attrName = '';
