@@ -1,4 +1,4 @@
-# SML
+# SML - Simple Markup Language
 HTML로 변환되는 간단한 마크업 언어
 
 ## 설치하기
