@@ -69,6 +69,21 @@ body
 </html>
 ```
 
+## 주석
+주석은 `#`으로 시작합니다.
+
+## `<script>`
+```sml
+# Global site tag (gtag.js) - Google Analytics
+script async src='https://www.googletagmanager.com/gtag/js?id=G-8VFLN47PWJ'
+script `
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-0000000000');
+	`
+```
+
 ## `textarea`나 `pre`
 `textarea`나 `pre`와 같이 내용에 엔터가 자동으로 들어가서는 안 되는 태그들이 존재합니다. 그런 경우 다음과 같이 한줄로 내용을 입력합니다.
 ```sml

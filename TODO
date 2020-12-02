@@ -1,0 +1,2 @@
+- div는 생략 가능하도록
+- textarea, pre, script는 ` 없이 그냥 쓸 수 있도록
